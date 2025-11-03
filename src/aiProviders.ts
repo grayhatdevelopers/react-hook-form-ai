@@ -1,4 +1,8 @@
-import type { AIProvider, AIResponse, AIProviderType } from './types';
+import type {
+  AIResponse,
+  OpenAIProviderConfig,
+  CustomProviderConfig,
+} from './types/ai';
 
 type AutofillData = Record<string, string>;
 
@@ -37,13 +41,13 @@ interface AIProviderExecutor {
     currentValue: string,
     formContext: Record<string, any>
   ): Promise<AIResponse | null>;
-  
+
   autofill(
     fields: string[],
     formContext: Record<string, any>,
     onProgress?: (progress: number) => void
   ): Promise<AutofillData | null>;
-  
+
   checkAvailability(): Promise<{
     available: boolean;
     status: string;
@@ -56,12 +60,12 @@ interface AIProviderExecutor {
  */
 class ChromeAIProvider implements AIProviderExecutor {
   async checkAvailability() {
-    if (typeof window === 'undefined' || typeof LanguageModel === 'undefined') {
+    if (typeof window === 'undefined' || typeof (window as any).LanguageModel === 'undefined') {
       return { available: false, status: 'unavailable', needsDownload: false };
     }
 
     try {
-      const availability = await LanguageModel.availability();
+      const availability = await (window as any).LanguageModel.availability();
       return {
         available: availability !== 'unavailable',
         status: availability,
@@ -93,12 +97,12 @@ Rules:
 
 Suggested value:`;
 
-      const session = await LanguageModel.create();
+      const session = await (window as any).LanguageModel.create();
       const result = await session.prompt(prompt);
       session.destroy();
 
       const cleaned = result.trim().replace(/^["']|["']$/g, '');
-      return { suggestion: cleaned, provider: 'chrome' };
+      return { suggestion: cleaned, provider: 'chrome-ai' }; // Updated provider key
     } catch (err) {
       console.error('Chrome AI error:', err);
       return null;
@@ -124,9 +128,9 @@ Example format:
 
 JSON object:`;
 
-      const session = await LanguageModel.create({
-        monitor(m) {
-          m.addEventListener('downloadprogress', (e) => {
+      const session = await (window as any).LanguageModel.create({
+        monitor(m: any) {
+          m.addEventListener('downloadprogress', (e: { loaded: number }) => {
             onProgress?.(e.loaded * 100);
           });
         },
@@ -151,7 +155,7 @@ JSON object:`;
  * OpenAI Provider
  */
 class OpenAIProvider implements AIProviderExecutor {
-  constructor(private config: Extract<AIProvider, { type: 'openai' }>) {}
+  constructor(private config: OpenAIProviderConfig) {}
 
   async checkAvailability() {
     return {
@@ -195,7 +199,7 @@ class OpenAIProvider implements AIProviderExecutor {
       });
 
       if (!response.ok) {
-        throw new Error(`OpenAI API error: ${response.status}`);
+        throw new Error(`OpenAI API error: ${response.status} - ${response.statusText}`);
       }
 
       const data = await response.json();
@@ -240,12 +244,12 @@ class OpenAIProvider implements AIProviderExecutor {
       });
 
       if (!response.ok) {
-        throw new Error(`OpenAI API error: ${response.status}`);
+        throw new Error(`OpenAI API error: ${response.status} - ${response.statusText}`);
       }
 
       const data = await response.json();
       const content = data.choices?.[0]?.message?.content?.trim();
-      
+
       if (content) {
         const jsonMatch = content.match(/\{[\s\S]*\}/);
         if (jsonMatch) {
@@ -261,25 +265,18 @@ class OpenAIProvider implements AIProviderExecutor {
 }
 
 /**
- * Custom Server Provider
+ * Custom Provider
  */
-class CustomServerProvider implements AIProviderExecutor {
-  constructor(private config: Extract<AIProvider, { type: 'custom' | 'browser' }>) {}
+class CustomProvider implements AIProviderExecutor {
+  constructor(private config: CustomProviderConfig) {}
 
   async checkAvailability() {
-    try {
-      const response = await fetch(`${this.config.apiUrl}/health`, {
-        method: 'GET',
-        headers: this.config.headers,
-      });
-      return {
-        available: response.ok,
-        status: response.ok ? 'ready' : 'unavailable',
-        needsDownload: false,
-      };
-    } catch {
-      return { available: false, status: 'unavailable', needsDownload: false };
-    }
+    const available = typeof this.config.onCall === 'function';
+    return {
+      available,
+      status: available ? 'ready' : 'missing-oncall-function',
+      needsDownload: false,
+    };
   }
 
   async suggestValue(
@@ -287,22 +284,21 @@ class CustomServerProvider implements AIProviderExecutor {
     currentValue: string,
     formContext: Record<string, any>
   ): Promise<AIResponse | null> {
+    if (!this.config.onCall) return null;
     try {
-      const response = await fetch(`${this.config.apiUrl}/api/suggest`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...this.config.headers,
-        },
-        body: JSON.stringify({ fieldName, currentValue, formContext }),
+      const result = await this.config.onCall({
+        operation: 'suggest',
+        fieldName,
+        currentValue,
+        formContext,
       });
-
-      if (!response.ok) throw new Error(`Server error: ${response.status}`);
-
-      const data = await response.json();
-      return data.suggestion ? { suggestion: data.suggestion, provider: 'custom' } : null;
+      if (typeof result === 'string') {
+        return { suggestion: result, provider: 'custom' };
+      }
+      console.error('Custom provider onCall for "suggest" must return a string.');
+      return null;
     } catch (err) {
-      console.error('Custom server error:', err);
+      console.error('Custom AI provider error (suggestValue):', err);
       return null;
     }
   }
@@ -311,75 +307,21 @@ class CustomServerProvider implements AIProviderExecutor {
     fields: string[],
     formContext: Record<string, any>
   ): Promise<AutofillData | null> {
+    if (!this.config.onCall) return null;
     try {
-      const response = await fetch(`${this.config.apiUrl}/api/autofill`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...this.config.headers,
-        },
-        body: JSON.stringify({ fields, formContext }),
+      const result = await this.config.onCall({
+        operation: 'autofill',
+        fields,
+        formContext,
       });
-
-      if (!response.ok) throw new Error(`Server error: ${response.status}`);
-
-      const data = await response.json();
-      return data.autofillData || null;
+      if (result && typeof result === 'object' && !Array.isArray(result)) {
+        return result as AutofillData;
+      }
+      console.error('Custom provider onCall for "autofill" must return an object.');
+      return null;
     } catch (err) {
-      console.error('Custom server autofill error:', err);
+      console.error('Custom AI provider error (autofill):', err);
       return null;
     }
   }
-}
-
-/**
- * Provider Factory
- */
-export function createAIProvider(config: AIProvider): AIProviderExecutor {
-  switch (config.type) {
-    case 'chrome':
-      return new ChromeAIProvider();
-    case 'openai':
-      return new OpenAIProvider(config);
-    case 'custom':
-    case 'browser':
-      return new CustomServerProvider(config);
-    default:
-      throw new Error(`Unknown provider type: ${(config as any).type}`);
-  }
-}
-
-/**
- * Execute AI providers in order with fallback
- */
-export async function executeAIProviders<T>(
-  providers: AIProvider[],
-  executionOrder: AIProviderType[],
-  fallbackOnError: boolean,
-  executor: (provider: AIProviderExecutor) => Promise<T | null>
-): Promise<{ result: T | null; provider: AIProviderType | null }> {
-  for (const providerType of executionOrder) {
-    const config = providers.find(p => p.type === providerType && p.enabled !== false);
-    if (!config) continue;
-
-    try {
-      const provider = createAIProvider(config);
-      const result = await executor(provider);
-      
-      if (result !== null) {
-        return { result, provider: providerType };
-      }
-      
-      if (!fallbackOnError) {
-        return { result: null, provider: null };
-      }
-    } catch (err) {
-      console.error(`Provider ${providerType} failed:`, err);
-      if (!fallbackOnError) {
-        return { result: null, provider: null };
-      }
-    }
-  }
-
-  return { result: null, provider: null };
 }
