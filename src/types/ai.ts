@@ -2,42 +2,62 @@
  * AI Provider Types
  */
 
-export type AIProviderType = 'chrome' | 'openai' | 'custom' | 'browser';
+// Renamed 'chrome' to 'chrome-ai' for clarity and consistency.
+export type AIProviderType = 'chrome-ai' | 'openai' | 'custom' | 'browser';
 
-export interface AIProviderConfig {
-  type: AIProviderType;
-  enabled?: boolean;
-  apiKey?: string;
-  apiUrl?: string;
-  model?: string;
-  priority?: number;
-}
+// --- Individual Provider Configuration Interfaces ---
+// These define the specific configurable options for each provider type.
 
-export interface OpenAIConfig extends AIProviderConfig {
-  type: 'openai';
+export interface OpenAIConfig {
   apiKey: string;
+  // Added optional 'apiUrl' for custom OpenAI-compatible endpoints.
   apiUrl?: string;
   model?: string;
   organization?: string;
 }
 
-export interface CustomServerConfig extends AIProviderConfig {
-  type: 'custom';
+export interface CustomProviderConfig {
+  apiUrl?: string;
+  headers?: Record<string, string>;
+  model?: string;
+  // Added hooks for custom client-side or server-side logic.
+  suggestValue?: (prompt: string, options?: any) => Promise<string>;
+  autofill?: (
+    schema: Record<string, any>,
+    data: Record<string, any>,
+    options?: any
+  ) => Promise<Record<string, any>>;
+}
+
+// Configuration for the built-in Chrome AI. Intentionally empty as it has no user-configurable options.
+export interface ChromeAIConfig {}
+
+export interface BrowserAIConfig {
   apiUrl: string;
   headers?: Record<string, string>;
+  model?: string;
 }
 
-export interface ChromeAIConfig extends AIProviderConfig {
-  type: 'chrome';
+// --- Comprehensive Union Type for AI Provider Configurations ---
+// This is the new primary type for defining a provider and its configuration.
+
+// Common metadata applicable to any provider instance.
+interface AIProviderMetadata {
+  enabled?: boolean;
+  priority?: number;
 }
 
-export interface BrowserAIConfig extends AIProviderConfig {
-  type: 'browser';
-  apiUrl: string;
-  headers?: Record<string, string>;
-}
+// A discriminated union that represents a fully configured AI provider.
+// This structure is cleaner and more type-safe than the previous inheritance model.
+export type AIProviderOption = AIProviderMetadata &
+  (
+    | { type: 'openai'; config: OpenAIConfig }
+    | { type: 'custom'; config: CustomProviderConfig }
+    | { type: 'chrome-ai'; config: ChromeAIConfig }
+    | { type: 'browser'; config: BrowserAIConfig }
+  );
 
-export type AIProvider = OpenAIConfig | CustomServerConfig | ChromeAIConfig | BrowserAIConfig;
+// --- Existing types adapted to use the new structure ---
 
 export interface AIExecutionOrder {
   providers: AIProviderType[];
@@ -45,7 +65,8 @@ export interface AIExecutionOrder {
 }
 
 export interface AIFormContextValue {
-  providers: AIProvider[];
+  // Updated to use the new comprehensive AIProviderOption type.
+  providers: AIProviderOption[];
   executionOrder: AIProviderType[];
   fallbackOnError: boolean;
   enabled: boolean;
