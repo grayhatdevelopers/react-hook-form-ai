@@ -15,9 +15,44 @@ interface AIAssistantOptions {
 }
 
 /**
- * AI Assistant Hook — uses configured providers from AIFormProvider
- * or falls back to legacy Chrome AI + server setup.
- * Local options override provider context.
+ * Low-level AI assistant hook for advanced use cases.
+ * 
+ * @public
+ * @remarks
+ * This hook provides direct access to AI capabilities without form integration.
+ * It uses configured providers from AIFormProvider or accepts local overrides.
+ * Most users should use the `useForm` hook instead, which includes this functionality.
+ * 
+ * @param options - Configuration options for the AI assistant
+ * @returns Object with AI methods: suggestValue, autofill, checkAvailability
+ * 
+ * @example Basic usage
+ * ```tsx
+ * const ai = useAIAssistant({
+ *   enabled: true,
+ *   formContext: { firstName: 'John' }
+ * });
+ * 
+ * // Get suggestion for a field
+ * const suggestion = await ai.suggestValue('email', 'john@');
+ * 
+ * // Autofill multiple fields
+ * const data = await ai.autofill(['firstName', 'lastName', 'email']);
+ * 
+ * // Check availability
+ * const status = await ai.checkAvailability();
+ * ```
+ * 
+ * @example With custom providers
+ * ```tsx
+ * const ai = useAIAssistant({
+ *   providers: [
+ *     { type: 'openai', apiKey: 'sk-...', priority: 10 }
+ *   ],
+ *   executionOrder: ['openai'],
+ *   fallbackOnError: false
+ * });
+ * ```
  */
 export function useAIAssistant({
   enabled = true,
@@ -116,7 +151,7 @@ export function useAIAssistant({
       // Check first provider in execution order
       const firstProviderType = effectiveConfig.executionOrder[0];
       const firstProvider = effectiveConfig.providers.find(p => p.type === firstProviderType);
-      
+
       if (firstProvider) {
         const { createAIProvider } = await import('../aiProviders');
         const provider = createAIProvider(firstProvider);
@@ -259,10 +294,10 @@ JSON object:`;
 
     if (response.ok) {
       const data = await response.json();
-      const parsed = typeof data.autofillData === 'string' 
-        ? JSON.parse(data.autofillData) 
+      const parsed = typeof data.autofillData === 'string'
+        ? JSON.parse(data.autofillData)
         : data.autofillData;
-      
+
       if (typeof parsed === 'object' && parsed !== null) {
         return parsed as AutofillData;
       }

@@ -12,7 +12,27 @@ import { useCallback, useRef, useState, useEffect, useMemo } from "react";
 import type { AIProvider, AIProviderType } from "./types";
 
 /**
- * AI configuration options for the form
+ * Configuration options for AI features in the form.
+ * 
+ * @public
+ * @remarks
+ * These options can be passed to the `useForm` hook via the `ai` property to configure
+ * AI-powered autofill and suggestions. Local options override global settings from `AIFormProvider`.
+ * 
+ * @example
+ * ```tsx
+ * const form = useForm<FormData>({
+ *   ai: {
+ *     enabled: true,
+ *     debounceMs: 500,
+ *     excludeFields: ['password', 'creditCard'],
+ *     providers: [
+ *       { type: 'chrome', priority: 10 },
+ *       { type: 'openai', apiKey: 'sk-...', priority: 5 }
+ *     ]
+ *   }
+ * });
+ * ```
  */
 export interface AIFormOptions {
   /** Enable AI features (default: true) */
@@ -34,7 +54,25 @@ export interface AIFormOptions {
 }
 
 /**
- * Extended return type with AI capabilities
+ * Extended return type from `useForm` hook with AI capabilities.
+ * 
+ * @public
+ * @remarks
+ * This interface extends the standard React Hook Form return type with additional
+ * AI-powered properties and methods for autofill, suggestions, and availability checking.
+ * 
+ * @typeParam T - The form data type extending FieldValues
+ * 
+ * @example
+ * ```tsx
+ * const {
+ *   register,
+ *   handleSubmit,
+ *   aiAutofill,
+ *   aiLoading,
+ *   aiAvailability
+ * } = useForm<FormData>();
+ * ```
  */
 export interface UseFormAIReturn<T extends FieldValues> extends UseFormReturn<T> {
   /** AI feature enabled state */
@@ -58,32 +96,58 @@ export interface UseFormAIReturn<T extends FieldValues> extends UseFormReturn<T>
 }
 
 /**
- * Enhanced useForm — wraps react-hook-form with AI autofill + suggestions.
- * Supports Chrome Built-in AI and server API fallback.
+ * Enhanced React Hook Form with AI-powered autofill and field suggestions.
  * 
- * @example
+ * @public
+ * @remarks
+ * A drop-in replacement for React Hook Form's `useForm` hook that adds AI capabilities
+ * including autofill, field suggestions, and availability checking. Supports multiple
+ * AI providers (Chrome Built-in AI, OpenAI, Custom Server) with automatic fallback.
+ * 
+ * @typeParam T - The form data type extending FieldValues
+ * @param options - Standard React Hook Form options plus optional AI configuration
+ * @returns Extended form object with AI capabilities
+ * 
+ * @example Basic usage
+ * ```tsx
+ * const { register, handleSubmit, aiAutofill } = useForm<FormData>();
+ * 
+ * return (
+ *   <form onSubmit={handleSubmit(onSubmit)}>
+ *     <input {...register('name')} />
+ *     <button type="button" onClick={() => aiAutofill()}>
+ *       AI Autofill
+ *     </button>
+ *   </form>
+ * );
+ * ```
+ * 
+ * @example With AI configuration
  * ```tsx
  * const form = useForm<FormData>({
  *   ai: {
  *     enabled: true,
- *     apiUrl: 'http://localhost:3001',
+ *     debounceMs: 500,
  *     excludeFields: ['password'],
- *     debounceMs: 800
+ *     providers: [
+ *       { type: 'chrome', priority: 10 },
+ *       { type: 'openai', apiKey: 'sk-...', priority: 5 }
+ *     ]
  *   }
  * });
+ * ```
  * 
- * // Check availability
- * useEffect(() => {
- *   if (form.aiAvailability?.needsDownload) {
- *     console.log('AI model needs download - user interaction required');
- *   }
- * }, [form.aiAvailability]);
+ * @example Handling Chrome AI download
+ * ```tsx
+ * const { aiAvailability, aiDownloadProgress, aiAutofill } = useForm<FormData>();
  * 
- * // Trigger autofill
- * await form.aiAutofill();
+ * if (aiAvailability?.needsDownload) {
+ *   return <button onClick={() => aiAutofill()}>Download AI Model</button>;
+ * }
  * 
- * // Get specific suggestion
- * const suggestion = await form.aiSuggest('email');
+ * if (aiAvailability?.status === 'downloading') {
+ *   return <progress value={aiDownloadProgress || 0} max={100} />;
+ * }
  * ```
  */
 export function useForm<T extends FieldValues>(

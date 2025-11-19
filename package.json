@@ -5,7 +5,8 @@
   "main": "src/index.ts",
   "scripts": {
     "build": "tsc",
-    "test": "jest"
+    "test": "jest",
+    "generate:api-reference": "npx tsdoc-markdown --src=\"src/**/*.ts\" --dest=docs/API_REFERENCE.md --repo=https://github.com/grayhatdevelopers/react-hook-form-ai"
   },
   "keywords": [
     "react",
@@ -52,6 +53,7 @@
     "eslint-plugin-simple-import-sort": "^12.1.1",
     "jest": "^26.0.0",
     "prettier": "^3.6.2",
+    "tsdoc-markdown": "^1.4.1",
     "typescript": "^4.0.0"
   },
   "peerDependencies": {
