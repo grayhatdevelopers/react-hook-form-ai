@@ -51,6 +51,8 @@ export interface AIFormOptions {
   executionOrder?: AIProviderType[];
   /** Override fallback behavior from AIFormProvider */
   fallbackOnError?: boolean;
+  /** Context for AI to use when filling forms (optional) */
+  formContext?: string | Record<string, any>;
 }
 
 /**
@@ -169,6 +171,7 @@ export function useForm<T extends FieldValues>(
       providers: localProviders,
       executionOrder: localOrder,
       fallbackOnError: localFallback,
+      formContext: localFormContext,
     } = aiOptions || {};
 
     return {
@@ -180,6 +183,7 @@ export function useForm<T extends FieldValues>(
       providers: localProviders ?? providerContext?.providers,
       executionOrder: localOrder ?? providerContext?.executionOrder,
       fallbackOnError: localFallback ?? providerContext?.fallbackOnError ?? true,
+      formContext: localFormContext ?? providerContext?.formContext,
     };
   }, [aiOptions, providerContext]);
 
@@ -192,6 +196,7 @@ export function useForm<T extends FieldValues>(
     providers,
     executionOrder,
     fallbackOnError,
+    formContext: configFormContext,
   } = mergedConfig;
 
   const form = useReactHookForm<T>(rhfOptions);
@@ -209,10 +214,20 @@ export function useForm<T extends FieldValues>(
   // Get current form values for context
   const formValues = form.watch();
 
+  // Merge form values with configured context
+  const mergedFormContext = useMemo(() => {
+    if (typeof configFormContext === 'string') {
+      return { ...formValues, _context: configFormContext };
+    } else if (configFormContext) {
+      return { ...formValues, ...configFormContext };
+    }
+    return formValues;
+  }, [formValues, configFormContext]);
+
   // Initialize AI assistant with form context and overrides
   const ai = useAIAssistant({
     enabled: aiEnabled,
-    formContext: formValues,
+    formContext: mergedFormContext,
     apiUrl,
     providers,
     executionOrder,

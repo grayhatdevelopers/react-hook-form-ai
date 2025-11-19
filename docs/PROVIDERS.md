@@ -15,7 +15,8 @@ Chrome's experimental on-device AI. Privacy-friendly and free, but requires Chro
 ```tsx
 {
   type: 'chrome',
-  priority: 10  // Optional: higher priority = tried first
+  priority: 10,  // Optional: higher priority = tried first
+  systemPrompt: 'Custom prompt...'  // Optional: custom AI prompt template
 }
 ```
 
@@ -33,6 +34,29 @@ Chrome's experimental on-device AI. Privacy-friendly and free, but requires Chro
 2. Visit `chrome://flags/#optimization-guide-on-device-model`
 3. Set to "Enabled"
 4. Restart Chrome
+
+### Custom Prompts
+
+Customize how Chrome AI generates suggestions using the `systemPrompt` option:
+
+```tsx
+{
+  type: 'chrome',
+  priority: 10,
+  systemPrompt: `You are a professional form assistant. 
+For the field named {fieldName} with current value "{currentValue}", 
+provide a suggestion based on this context: {formContext}.
+Return only the suggested value, no explanations.`
+}
+```
+
+**Available placeholders:**
+- `{fieldName}` - The name of the field being filled
+- `{currentValue}` - The current value in the field
+- `{formContext}` - The form context as JSON
+- `{fields}` - List of all form fields (for autofill)
+
+If no custom prompt is provided, a sensible default is used.
 
 ### Handling Model Download
 
@@ -225,6 +249,44 @@ Connect to browser-based AI services.
 }
 ```
 
+## Form Context
+
+Provide contextual information to help AI generate better suggestions:
+
+```tsx
+<AIFormProvider
+  providers={[{ type: 'chrome', priority: 10 }]}
+  formContext="Senior software engineer with 8+ years of experience applying for a tech lead position"
+>
+  <App />
+</AIFormProvider>
+```
+
+Or use an object for structured context:
+
+```tsx
+<AIFormProvider
+  providers={[{ type: 'chrome', priority: 10 }]}
+  formContext={{
+    role: 'Senior Engineer',
+    experience: '8+ years',
+    specialization: 'Full-stack development'
+  }}
+>
+  <App />
+</AIFormProvider>
+```
+
+Forms can override the global context:
+
+```tsx
+const form = useForm({
+  ai: {
+    formContext: 'Junior developer with 2 years of experience'
+  }
+});
+```
+
 ## Multi-Provider Setup
 
 Configure multiple providers with automatic fallback:
@@ -255,6 +317,7 @@ Configure multiple providers with automatic fallback:
   ]}
   executionOrder={['chrome', 'openai', 'custom']}
   fallbackOnError={true}
+  formContext="Default context for all forms"
 >
   <App />
 </AIFormProvider>

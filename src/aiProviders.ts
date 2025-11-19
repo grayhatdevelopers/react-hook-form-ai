@@ -55,6 +55,8 @@ interface AIProviderExecutor {
  * Chrome Built-in AI Provider
  */
 class ChromeAIProvider implements AIProviderExecutor {
+  constructor(private config?: Extract<AIProvider, { type: 'chrome' }>) {}
+
   async checkAvailability() {
     if (typeof window === 'undefined' || typeof LanguageModel === 'undefined') {
       return { available: false, status: 'unavailable', needsDownload: false };
@@ -78,7 +80,7 @@ class ChromeAIProvider implements AIProviderExecutor {
     formContext: Record<string, any>
   ): Promise<AIResponse | null> {
     try {
-      const prompt = `You are assisting with form completion. The user is filling out a field named "${fieldName}".
+      const defaultPrompt = `You are assisting with form completion. The user is filling out a field named "${fieldName}".
 
 Current value: "${currentValue}"
 Form context: ${JSON.stringify(formContext, null, 2)}
@@ -92,6 +94,13 @@ Rules:
 - Make sure the suggestion is appropriate for the field name
 
 Suggested value:`;
+
+      const prompt = this.config?.systemPrompt 
+        ? this.config.systemPrompt
+            .replace('{fieldName}', fieldName)
+            .replace('{currentValue}', currentValue)
+            .replace('{formContext}', JSON.stringify(formContext, null, 2))
+        : defaultPrompt;
 
       const session = await LanguageModel.create();
       const result = await session.prompt(prompt);
@@ -111,7 +120,7 @@ Suggested value:`;
     onProgress?: (progress: number) => void
   ): Promise<AutofillData | null> {
     try {
-      const prompt = `You are an intelligent form assistant. Generate realistic example values for a form.
+      const defaultPrompt = `You are an intelligent form assistant. Generate realistic example values for a form.
 
 Form fields: ${fields.join(', ')}
 Context: ${JSON.stringify(formContext, null, 2)}
@@ -123,6 +132,12 @@ Example format:
 {"name": "Alice Johnson", "email": "alice@example.com", "age": "29"}
 
 JSON object:`;
+
+      const prompt = this.config?.systemPrompt 
+        ? this.config.systemPrompt
+            .replace('{fields}', fields.join(', '))
+            .replace('{formContext}', JSON.stringify(formContext, null, 2))
+        : defaultPrompt;
 
       const session = await LanguageModel.create({
         monitor(m) {
@@ -338,7 +353,7 @@ class CustomServerProvider implements AIProviderExecutor {
 export function createAIProvider(config: AIProvider): AIProviderExecutor {
   switch (config.type) {
     case 'chrome':
-      return new ChromeAIProvider();
+      return new ChromeAIProvider(config);
     case 'openai':
       return new OpenAIProvider(config);
     case 'custom':
