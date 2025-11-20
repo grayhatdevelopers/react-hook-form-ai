@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://grayhatdevelopers.github.io/react-hook-form-ai/sitemap.xml
