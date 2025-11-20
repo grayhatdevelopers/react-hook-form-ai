@@ -1,7 +1,7 @@
 import { useOptionalAIFormContext } from '../AIFormProvider';
 import { executeAIProviders } from '../aiProviders';
 import type { AIProvider, AIProviderType } from '../types';
-import { useMemo } from 'react';
+import { useMemo, useRef, useEffect } from 'react';
 
 type AutofillData = Record<string, string>;
 
@@ -64,6 +64,15 @@ export function useAIAssistant({
 }: AIAssistantOptions = {}) {
   const providerContext = useOptionalAIFormContext();
 
+  // CRITICAL FIX: Use a ref to store the latest formContext
+  const formContextRef = useRef(formContext);
+  
+  // Update ref whenever formContext changes
+  useEffect(() => {
+    formContextRef.current = formContext;
+    console.log('🔄 AI Assistant context updated:', formContext);
+  }, [formContext]);
+
   // Merge context with local overrides (local takes precedence)
   const effectiveConfig = useMemo(() => {
     return {
@@ -79,13 +88,17 @@ export function useAIAssistant({
   async function suggestValue(name: string, value: string): Promise<string | null> {
     if (!enabled) return null;
 
+    // CRITICAL FIX: Use the latest context from ref
+    const currentContext = formContextRef.current;
+    console.log('💡 Suggesting value for', name, 'with context:', currentContext);
+
     if (effectiveConfig.providers && effectiveConfig.executionOrder) {
       const { result } = await executeAIProviders(
         effectiveConfig.providers,
         effectiveConfig.executionOrder,
         effectiveConfig.fallbackOnError,
         async (provider) => {
-          const response = await provider.suggestValue(name, value, formContext);
+          const response = await provider.suggestValue(name, value, currentContext);
           return response;
         }
       );
@@ -96,7 +109,7 @@ export function useAIAssistant({
       }
     } else {
       // Legacy fallback: Chrome AI -> Server
-      const legacyResult = await legacySuggestValue(name, value, formContext, apiUrl);
+      const legacyResult = await legacySuggestValue(name, value, currentContext, apiUrl);
       return legacyResult;
     }
 
@@ -115,13 +128,17 @@ export function useAIAssistant({
       return Object.fromEntries(fields.map((f) => [f, 'AI disabled'])) as AutofillData;
     }
 
+    // CRITICAL FIX: Use the latest context from ref
+    const currentContext = formContextRef.current;
+    console.log('🤖 Auto-filling with context:', currentContext);
+
     if (effectiveConfig.providers && effectiveConfig.executionOrder) {
       const { result } = await executeAIProviders(
         effectiveConfig.providers,
         effectiveConfig.executionOrder,
         effectiveConfig.fallbackOnError,
         async (provider) => {
-          const data = await provider.autofill(fields, formContext, options?.onDownloadProgress);
+          const data = await provider.autofill(fields, currentContext, options?.onDownloadProgress);
           return data;
         }
       );
@@ -131,7 +148,7 @@ export function useAIAssistant({
       }
     } else {
       // Legacy fallback
-      const legacyResult = await legacyAutofill(fields, formContext, apiUrl, options);
+      const legacyResult = await legacyAutofill(fields, currentContext, apiUrl, options);
       return legacyResult;
     }
 
