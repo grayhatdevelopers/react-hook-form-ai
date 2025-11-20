@@ -423,6 +423,10 @@ Override the order in which providers are tried. Inherits from `AIFormProvider` 
 
 Automatically try the next provider if one fails. Default: `true`
 
+#### `formContext?: string | Record<string, any>`
+
+Context information for AI to use when generating suggestions. Can be a string description or an object with contextual data.
+
 **Example:**
 
 ```tsx
@@ -436,7 +440,8 @@ const form = useForm<FormData>({
       { type: 'openai', apiKey: 'sk-...', priority: 5 }
     ],
     executionOrder: ['chrome', 'openai'],
-    fallbackOnError: true
+    fallbackOnError: true,
+    formContext: 'Senior software engineer applying for a tech lead position'
   }
 });
 ```
@@ -476,6 +481,10 @@ Debounce time in milliseconds for AI suggestions. Default: `800`
 #### `excludeFields?: string[]`
 
 Array of field names to exclude from AI processing. Default: `[]`
+
+#### `formContext?: string | Record<string, any>`
+
+Global context information for AI to use when generating suggestions. Can be a string description or an object with contextual data. Forms can override this with their own local context.
 
 ---
 
@@ -634,6 +643,10 @@ Set to `false` to disable this provider. Optional.
 
 Higher values are tried first. Optional, default: 0.
 
+#### `systemPrompt?: string`
+
+Custom prompt template for Chrome AI. Use placeholders `{fieldName}`, `{currentValue}`, `{formContext}`, and `{fields}` for dynamic values. If not provided, uses the default prompt.
+
 **Features:**
 - ✅ No API key required
 - ✅ Browser-based and privacy-friendly
@@ -646,7 +659,8 @@ Higher values are tried first. Optional, default: 0.
 ```tsx
 const config: ChromeAIConfig = {
   type: 'chrome',
-  priority: 10
+  priority: 10,
+  systemPrompt: 'You are a professional recruiter. For field {fieldName} with value "{currentValue}", suggest a professional response. Context: {formContext}. Return only the value.'
 };
 ```
 

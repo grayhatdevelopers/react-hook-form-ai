@@ -107,6 +107,7 @@ export interface CustomServerConfig extends AIProviderConfig {
 export interface ChromeAIConfig extends AIProviderConfig {
   /** Must be 'chrome' */
   type: 'chrome';
+  systemPrompt?: string;
 }
 
 /**
@@ -188,6 +189,8 @@ export interface AIFormContextValue {
   debounceMs: number;
   /** Array of field names to exclude from AI processing */
   excludeFields: string[];
+  /** Global context for AI to use when filling forms (optional) */
+  formContext?: string | Record<string, any>;
 }
 
 /**

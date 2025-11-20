@@ -19,6 +19,8 @@ export interface AIFormProviderProps {
   enabled?: boolean;
   debounceMs?: number;
   excludeFields?: string[];
+  /** Global context for AI to use when filling forms (optional) */
+  formContext?: string | Record<string, any>;
 }
 
 /**
