@@ -1,0 +1,33 @@
+{
+  "name": "react-hook-form-ai-demo",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "class-variance-authority": "^0.7.0",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.441.0",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "react-hook-form-ai": "^1.0.6",
+    "react-router-dom": "^6.26.0",
+    "shiki": "^3.15.0",
+    "tailwind-merge": "^2.5.2"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.1.17",
+    "@types/node": "^24.10.1",
+    "@types/react": "^18.3.5",
+    "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react": "^4.3.1",
+    "gh-pages": "^6.3.0",
+    "tailwindcss": "^4.1.17",
+    "typescript": "^5.5.3",
+    "vite": "^5.4.3"
+  }
+}
