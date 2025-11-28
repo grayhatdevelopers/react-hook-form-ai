@@ -5,15 +5,15 @@ import path from 'path';
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],
-  base: '/rhf-demo/',
+  base: '/react-hook-form-ai/',
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
-      'rhf-demo': path.resolve(__dirname, '..')
+      'react-hook-form-ai': path.resolve(__dirname, '..')
     }
   },
   optimizeDeps: {
-    exclude: ['rhf-demo']
+    exclude: ['react-hook-form-ai']
   },
   server: {
     fs: {

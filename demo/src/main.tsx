@@ -13,7 +13,7 @@ if (sessionStorage.redirect) {
 
 ReactDOM.render(
   <React.StrictMode>
-    <BrowserRouter basename="/rhf-demo/">
+    <BrowserRouter basename="/react-hook-form-ai/">
       <App />
     </BrowserRouter>
   </React.StrictMode>,
