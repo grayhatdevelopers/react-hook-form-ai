@@ -3,10 +3,20 @@
   <head>
     <meta charset="utf-8" />
     <script>
-      // Redirect to index.html and keep the original path
-      sessionStorage.redirect = location.pathname + location.search;
-      location.href = location.origin + location.pathname.replace(/\/[^\/]*$/, '/') + 'index.html';
+      const pathname = location.pathname;
+      const hasExtension = /\.[^\/]+$/.test(pathname);
+
+      // Only redirect SPA routes (no extension)
+      if (!hasExtension) {
+        const redirectUrl = encodeURIComponent(pathname + location.search);
+
+        // Redirect exactly once into SPA entry
+        location.replace("/react-hook-form-ai/index.html?redirect=" + redirectUrl);
+      }
     </script>
+    <title>404</title>
   </head>
-  <body></body>
+  <body>
+    <h1>404</h1>
+  </body>
 </html>

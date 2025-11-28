@@ -4,11 +4,12 @@ import { BrowserRouter } from "react-router-dom";
 import App from "./App";
 import "./index.css";
 
-// Restore intended SPA route after GitHub Pages redirect fallback
-if (sessionStorage.redirect) {
-  const redirectUrl = sessionStorage.redirect as string;
-  delete sessionStorage.redirect;
-  history.replaceState(null, "", redirectUrl);
+// Read redirect query param
+const params = new URLSearchParams(location.search);
+const redirect = params.get("redirect");
+
+if (redirect) {
+  history.replaceState(null, "", redirect);
 }
 
 ReactDOM.render(
