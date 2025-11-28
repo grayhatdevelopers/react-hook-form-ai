@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Copy, Check } from 'lucide-react';
 import { useState } from 'react';
+import CodeBlock from '@/components/ui/codeBlock';
 
 export default function GetStarted() {
   const [copied, setCopied] = useState<string | null>(null);
@@ -13,7 +14,12 @@ export default function GetStarted() {
     setTimeout(() => setCopied(null), 2000);
   };
 
-  const installCommand = 'npm install react-hook-form-ai';
+  const installCommands = [
+    { id: 'npm', label: 'npm', code: 'npm install react-hook-form-ai' },
+    { id: 'pnpm', label: 'pnpm', code: 'pnpm add react-hook-form-ai' },
+    { id: 'yarn', label: 'yarn', code: 'yarn add react-hook-form-ai' },
+  ];
+
   const basicExample = `import { useForm } from 'react-hook-form-ai';
 
 interface FormData {
@@ -83,34 +89,19 @@ function Root() {
               Install the package using your preferred package manager
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <div className="relative">
-              <pre className="bg-slate-950 text-slate-50 p-4 rounded-md overflow-x-auto">
-                <code>{installCommand}</code>
-              </pre>
-              <Button
-                size="icon"
-                variant="ghost"
-                className="absolute top-2 right-2 text-slate-50 hover:bg-slate-800"
-                onClick={() => copyToClipboard(installCommand, 'install')}
-              >
-                {copied === 'install' ? (
-                  <Check className="h-4 w-4" />
-                ) : (
-                  <Copy className="h-4 w-4" />
-                )}
-              </Button>
-            </div>
-            <div className="mt-4 space-y-2">
-              <p className="text-sm text-muted-foreground">Or with pnpm:</p>
-              <pre className="bg-slate-950 text-slate-50 p-4 rounded-md overflow-x-auto text-sm">
-                <code>pnpm add react-hook-form-ai</code>
-              </pre>
-              <p className="text-sm text-muted-foreground">Or with yarn:</p>
-              <pre className="bg-slate-950 text-slate-50 p-4 rounded-md overflow-x-auto text-sm">
-                <code>yarn add react-hook-form-ai</code>
-              </pre>
-            </div>
+          <CardContent className="space-y-4">
+            {installCommands.map(cmd => (
+              <div key={cmd.id} className="relative group">
+                <CodeBlock code={cmd.code} />
+                <Button
+                  size="sm"
+                  className="absolute top-2 right-2 flex items-center gap-1 bg-transparent hover:bg-muted/10 border border-gray-300"
+                  onClick={() => copyToClipboard(cmd.code, cmd.id)}
+                >
+                  {copied === cmd.id ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                </Button>
+              </div>
+            ))}
           </CardContent>
         </Card>
 
@@ -122,22 +113,15 @@ function Root() {
               Replace your React Hook Form import and start using AI features
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <div className="relative">
-              <pre className="bg-slate-950 text-slate-50 p-4 rounded-md overflow-x-auto text-sm">
-                <code>{basicExample}</code>
-              </pre>
+          <CardContent className="relative">
+            <div className='relative'>
+              <CodeBlock code={basicExample} />
               <Button
-                size="icon"
-                variant="ghost"
-                className="absolute top-2 right-2 text-slate-50 hover:bg-slate-800"
+                size="sm"
+                className="absolute top-2 right-2 flex items-center gap-1 bg-transparent hover:bg-muted/10 border border-gray-300"
                 onClick={() => copyToClipboard(basicExample, 'basic')}
               >
-                {copied === 'basic' ? (
-                  <Check className="h-4 w-4" />
-                ) : (
-                  <Copy className="h-4 w-4" />
-                )}
+                {copied === 'basic' ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
               </Button>
             </div>
           </CardContent>
@@ -151,22 +135,15 @@ function Root() {
               Set up multiple AI providers with automatic fallback
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="relative">
             <div className="relative">
-              <pre className="bg-slate-950 text-slate-50 p-4 rounded-md overflow-x-auto text-sm">
-                <code>{providerExample}</code>
-              </pre>
+              <CodeBlock code={providerExample} />
               <Button
-                size="icon"
-                variant="ghost"
-                className="absolute top-2 right-2 text-slate-50 hover:bg-slate-800"
+                size="sm"
+                className="absolute top-2 right-2 flex items-center gap-1 bg-transparent hover:bg-muted/10 border border-gray-300"
                 onClick={() => copyToClipboard(providerExample, 'provider')}
               >
-                {copied === 'provider' ? (
-                  <Check className="h-4 w-4" />
-                ) : (
-                  <Copy className="h-4 w-4" />
-                )}
+                {copied === 'provider' ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
               </Button>
             </div>
           </CardContent>
