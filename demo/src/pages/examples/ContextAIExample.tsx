@@ -259,7 +259,7 @@ export default function ContextFormExample() {
 
                   <div className="p-3 bg-blue-50 border border-blue-200 rounded-md">
                     <div className="flex items-start gap-2">
-                      <Info className="h-4 w-4 mt-0.5 text-blue-600 flex-shrink-0" />
+                      <Info className="h-4 w-4 mt-0.5 text-blue-600 shrink-0" />
                       <div>
                         <p className="text-sm font-medium text-blue-900">Active Context:</p>
                         <p className="text-sm text-blue-700 mt-1">{displayContext}</p>

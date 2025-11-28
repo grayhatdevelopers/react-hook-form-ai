@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Sparkles, AlertCircle } from 'lucide-react';
+import CodeBlock from '@/components/ui/codeBlock';
 
 interface FormData {
   name: string;
@@ -24,6 +25,34 @@ function MultiProviderForm() {
 
   const [error, setError] = useState<string | null>(null);
   const [lastProvider, setLastProvider] = useState<string>('');
+
+  const codeExample = `<AIFormProvider
+  providers={[
+    { 
+      type: 'chrome', 
+      priority: 10 
+    },
+    { 
+      type: 'openai', 
+      apiKey: 'sk-...', 
+      model: 'gpt-3.5-turbo',
+      priority: 5 
+    },
+    {
+      type: 'custom',
+      apiUrl: 'https://api.example.com',
+      priority: 1
+    }
+  ]}
+  executionOrder={[
+    'chrome', 
+    'openai', 
+    'custom'
+  ]}
+  fallbackOnError={true}
+>
+  <App />
+</AIFormProvider>`
 
   const handleAutofill = async () => {
     setError(null);
@@ -142,33 +171,7 @@ function MultiProviderForm() {
           </CardHeader>
           <CardContent>
             <pre className="text-xs overflow-x-auto bg-slate-950 text-slate-50 p-4 rounded-md">
-              <code>{`<AIFormProvider
-  providers={[
-    { 
-      type: 'chrome', 
-      priority: 10 
-    },
-    { 
-      type: 'openai', 
-      apiKey: 'sk-...', 
-      model: 'gpt-3.5-turbo',
-      priority: 5 
-    },
-    {
-      type: 'custom',
-      apiUrl: 'https://api.example.com',
-      priority: 1
-    }
-  ]}
-  executionOrder={[
-    'chrome', 
-    'openai', 
-    'custom'
-  ]}
-  fallbackOnError={true}
->
-  <App />
-</AIFormProvider>`}</code>
+              <CodeBlock code={codeExample} />
             </pre>
           </CardContent>
         </Card>

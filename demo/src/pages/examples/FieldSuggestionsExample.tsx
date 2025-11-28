@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Sparkles, Check, X } from 'lucide-react';
+import CodeBlock from '@/components/ui/codeBlock';
 
 interface ProfileForm {
   username: string;
@@ -64,6 +65,41 @@ export default function FieldSuggestionsExample() {
     console.log('Form submitted:', data);
     alert('Profile saved! Check console for data.');
   };
+
+  const codeExample =`const { 
+  register, 
+  aiSuggest, 
+  setValue 
+} = useForm<ProfileForm>({
+  ai: {
+    debounceMs: 500,
+  }
+});
+
+const [suggestions, setSuggestions] = 
+  useState<Record<string, string>>({});
+
+const getSuggestion = async (
+  fieldName: keyof ProfileForm
+) => {
+  const suggestion = 
+    await aiSuggest(fieldName);
+  if (suggestion) {
+    setSuggestions(prev => ({
+      ...prev,
+      [fieldName]: suggestion
+    }));
+  }
+};
+
+const acceptSuggestion = (
+  fieldName: keyof ProfileForm
+) => {
+  setValue(
+    fieldName, 
+    suggestions[fieldName]
+  );
+};`
 
   return (
     <div className="container py-8 md:py-10 max-w-5xl">
@@ -286,40 +322,7 @@ export default function FieldSuggestionsExample() {
             </CardHeader>
             <CardContent>
               <pre className="text-xs overflow-x-auto bg-slate-950 text-slate-50 p-4 rounded-md">
-                <code>{`const { 
-  register, 
-  aiSuggest, 
-  setValue 
-} = useForm<ProfileForm>({
-  ai: {
-    debounceMs: 500,
-  }
-});
-
-const [suggestions, setSuggestions] = 
-  useState<Record<string, string>>({});
-
-const getSuggestion = async (
-  fieldName: keyof ProfileForm
-) => {
-  const suggestion = 
-    await aiSuggest(fieldName);
-  if (suggestion) {
-    setSuggestions(prev => ({
-      ...prev,
-      [fieldName]: suggestion
-    }));
-  }
-};
-
-const acceptSuggestion = (
-  fieldName: keyof ProfileForm
-) => {
-  setValue(
-    fieldName, 
-    suggestions[fieldName]
-  );
-};`}</code>
+                <CodeBlock code={codeExample} />
               </pre>
             </CardContent>
           </Card>

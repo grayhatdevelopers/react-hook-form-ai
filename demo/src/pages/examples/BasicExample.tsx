@@ -4,8 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Sparkles, Copy, Check } from 'lucide-react';
-import { useState, useEffect } from 'react';
-import { codeToHtml } from 'shiki';
+import { useState } from 'react';
+import CodeBlock from '@/components/ui/codeBlock';
 
 interface FormData {
   firstName: string;
@@ -69,18 +69,7 @@ export default function BasicExample() {
     formState: { errors },
   } = useForm<FormData>();
 
-  const [highlightedCode, setHighlightedCode] = useState('');
   const [copied, setCopied] = useState(false);
-
-  useEffect(() => {
-    // Load and highlight code with Shiki using a darker theme
-    codeToHtml(codeExample, {
-      lang: 'typescript',
-      theme: 'one-dark-pro' // Darker theme options: 'one-dark-pro', 'tokyo-night', 'dracula', 'material-theme-darker'
-    }).then(html => {
-      setHighlightedCode(html);
-    });
-  }, []);
 
   const onSubmit = (data: FormData) => {
     console.log('Form submitted:', data);
@@ -232,22 +221,7 @@ export default function BasicExample() {
               </Button>
             </CardHeader>
             <CardContent>
-              <div className="relative overflow-x-auto rounded-md bg-[#0d1117]">
-                {highlightedCode ? (
-                  <div 
-                    dangerouslySetInnerHTML={{ __html: highlightedCode }}
-                    className="text-sm [&_pre]:bg-[#0d1117]! [&_pre]:p-4! [&_pre]:m-0!"
-                  />
-                ) : (
-                  <div className="bg-[#0d1117] p-4 rounded-md">
-                    <div className="animate-pulse space-y-2">
-                      <div className="h-4 bg-slate-800 rounded w-3/4"></div>
-                      <div className="h-4 bg-slate-800 rounded w-1/2"></div>
-                      <div className="h-4 bg-slate-800 rounded w-5/6"></div>
-                    </div>
-                  </div>
-                )}
-              </div>
+              <CodeBlock code={codeExample} />
             </CardContent>
           </Card>
 
