@@ -21,13 +21,18 @@ jobs:
         with:
           node-version: 20
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
       - name: Install dependencies
         working-directory: demo
-        run: npm ci
+        run: pnpm install
 
       - name: Build Vite project
         working-directory: demo
-        run: npm run build
+        run: pnpm run build
 
       - name: Deploy dist folder to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
