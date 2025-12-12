@@ -1,8 +1,15 @@
 {
   "name": "react-hook-form-ai",
-  "version": "1.0.8",
+  "version": "1.0.10",
   "description": "A wrapper package over React Hook Form that enables AI features like auto-fill and form summarization using the browser's built-in LLM.",
-  "main": "src/index.ts",
+  "main": "dist/index.js",
+  "types": "dist/types/index.js",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE",
+    "package.json"
+  ],
   "scripts": {
     "build": "tsc",
     "test": "jest",

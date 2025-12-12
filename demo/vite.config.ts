@@ -8,12 +8,8 @@ export default defineConfig({
   base: '/react-hook-form-ai/',
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './src'),
-      'react-hook-form-ai': path.resolve(__dirname, '..')
+      '@': path.resolve(__dirname, './src')
     }
-  },
-  optimizeDeps: {
-    exclude: ['react-hook-form-ai']
   },
   server: {
     fs: {
