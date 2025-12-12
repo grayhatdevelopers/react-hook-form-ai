@@ -1,5 +1,5 @@
 import { Routes, Route } from 'react-router-dom';
-import { AIFormProvider } from '../../src/index';
+import { AIFormProvider } from 'react-hook-form-ai';
 import Layout from './components/Layout';
 import Home from './pages/Home';
 import GetStarted from './pages/GetStarted';
