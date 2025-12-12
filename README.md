@@ -1,6 +1,6 @@
 <div align="center">
-    <a href="https://github.com/SaadBazaz/react-hook-form-ai" title="React Hook Form AI - Simple React forms validation, combined with the power of AI">
-        <img src="https://raw.githubusercontent.com/SaadBazaz/react-hook-form-ai/master/docs/logo.png" alt="React Hook AI Form Logo - React hook custom hook for form validation, with AI" />
+    <a href="https://github.com/grayhatdevelopers/react-hook-form-ai" title="React Hook Form AI - Simple React forms validation, combined with the power of AI">
+        <img src="https://raw.githubusercontent.com/grayhatdevelopers/react-hook-form-ai/master/docs/logo.png" alt="React Hook AI Form Logo - React hook custom hook for form validation, with AI" />
     </a>
 </div>
 
@@ -8,7 +8,7 @@
 
 [![npm downloads](https://img.shields.io/npm/dm/react-hook-form-ai.svg?style=for-the-badge)](https://www.npmjs.com/package/react-hook-form-ai)
 [![npm](https://img.shields.io/npm/dt/react-hook-form-ai.svg?style=for-the-badge)](https://www.npmjs.com/package/react-hook-form-ai)
-[![npm](https://img.shields.io/npm/l/react-hook-form-ai?style=for-the-badge)](https://github.com/SaadBazaz/react-hook-form-ai/blob/master/LICENSE)
+[![npm](https://img.shields.io/npm/l/react-hook-form-ai?style=for-the-badge)](https://github.com/grayhatdevelopers/react-hook-form-ai/blob/master/LICENSE)
 
 </div>
 
